@@ -1,0 +1,80 @@
+/*	Kindly do not edit comments or copyrights (c) 	*/
+
+--- Script By	:	Akida M Jafar
+--- Mail	:	info@techcaresinc.com
+--- Start Date	:	01.09.2020
+--- Objective	:	To Determine Net Profit Archieved Depot Wise 
+
+/* 	This script was initiated by the scripter to enable review	*
+ *	of company expenses on monthly basis, based on depot run up	*/
+
+
+SELECT 
+	Jafari."DocNum" as "Sap ref", 
+	Jafari."DocDate" as "Date", 
+	Jafari."CardName" as "Remarks", 
+	Mchasa."ItemCode" as "Item", 
+	Mchasa."Dscription" as "Account", 
+	( Mchasa."Price") * Mchasa."Quantity" as "Amount", CASE
+	WHEN Mchasa."WhsCode" = 'FG WHS'
+		THEN 'Msa'
+	WHEN Jafari."CardCode" NOT LIKE 'VS%%'
+		THEN Mchasa."WhsCode"
+	ELSE
+		Akida."U_Depot" 
+	END as "Depot", 
+	Simaili."U_NAME" as "User",
+	'01 Sales' as "Doc type" 
+FROM 
+	OINV Jafari  
+	INNER JOIN INV1 Mchasa ON Jafari."DocEntry" = Mchasa."DocEntry" 
+	INNER JOIN OCRD Akida ON Jafari."CardCode" = Akida."CardCode" 
+	INNER JOIN OUSR Simaili ON Jafari."UserSign" = Simaili."USERID" 
+
+WHERE Jafari."DocDate" between [%0] and [%1] and  Jafari."CANCELED" = 'N' and  Jafari."DocTotal" > 0
+
+UNION ALL
+
+SELECT 
+	Mchasa."DocNum" as "Sap ref", 
+	Mchasa."DocDate" as "Date",
+	Jafari."Dscription" as "Remarks", 
+	Jafari."OcrCode2" as "Item", 
+	Akida."AcctName" as "Account", 
+	-Jafari."PriceBefDi" as "Amount",
+	Jafari."OcrCode3" as "Depot",  
+	Simaili."U_NAME" as "User",
+	'02 Costs' as "Doc type" 
+
+FROM 
+	PCH1 Jafari  
+	INNER JOIN OPCH Mchasa ON Jafari."DocEntry" = Mchasa."DocEntry" 
+	INNER JOIN OACT Akida ON Jafari."AcctCode" = Akida."AcctCode"
+	INNER JOIN OUSR Simaili ON Mchasa."UserSign" = Simaili."USERID"
+
+WHERE Mchasa."DocDate" between [%0] and [%1]
+	and Mchasa."CANCELED" = 'N'
+
+UNION ALL
+
+SELECT 
+	Jafari."DocNum" as "Sap ref",
+ 	Jafari."DocDate" as "Date",
+	Jafari."JrnlMemo" as "Remarks", 
+	Mchasa."OcrCode2" as "Item", 
+	Mchasa."AcctName" as "Account",
+	-Mchasa."SumApplied" as "Amount",
+	Mchasa."OcrCode3" as "Depot",
+	Akida."U_NAME" as "User",
+	'02 Costs' as "Doc type" 
+  
+FROM 
+	OVPM Jafari  
+	INNER JOIN VPM4 Mchasa ON Jafari."DocEntry" = Mchasa."DocNum" 
+	INNER JOIN OUSR Akida ON Jafari."UserSign" = Akida."USERID"
+
+WHERE Jafari."DocDate"  between [%0] and [%1]
+	and  Jafari."Canceled" = 'N'
+
+/*	The owner allows modification of the script as long you maintain the copy rights (c)	*
+ *	commented here with, for any clarification please get in touch wa.me/254759184063	*/

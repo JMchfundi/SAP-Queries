@@ -1,0 +1,52 @@
+/*	Kindly do not edit comments or copyrights (c) 	*/
+
+--- Script By	:	Akida M Jafar
+--- Mail	:	info@techcaresinc.com
+--- Start Date	:	01.06.2020
+--- Objective	:	To Analyse Sales Based in SAP
+
+/* 	This script was initiated by the scripter to enable review	*
+ *	of company Day to Day postings 					*/
+SELECT 
+	T0."DocNum", 
+	T0."DocDate", 
+	T3."SlpName", 
+	T0."CardName", 
+	T1."ItemCode", 
+	T1."Dscription", 
+	T1."Quantity" 
+
+FROM 
+	OINV T0  
+	INNER JOIN INV1 T1 ON T0."DocEntry" = T1."DocEntry" 
+	INNER JOIN OCRD T2 ON T0."CardCode" = T2."CardCode" 
+	INNER JOIN OSLP T3 ON T0."SlpCode" = T3."SlpCode" 
+
+WHERE T0."DocDate" between [%0] and [%1] 
+	and  T0."CANCELED" = 'N'
+	and T1."Quantity" > 0
+
+UNION ALL
+
+SELECT 
+	T0."DocNum", 
+	T0."DocDate", 
+	T3."SlpName", 
+	T0."CardName", 
+	T1."ItemCode", 
+	T1."Dscription", 
+	-T1."Quantity" as "Quantity" 
+
+FROM 
+	ORIN T0  
+	INNER JOIN RIN1 T1 ON T0."DocEntry" = T1."DocEntry" 
+	INNER JOIN OCRD T2 ON T0."CardCode" = T2."CardCode" 
+	INNER JOIN OSLP T3 ON T0."SlpCode" = T3."SlpCode" 
+
+WHERE T0."DocDate" between [%0] and [%1] 
+	and  T0."CANCELED" = 'N' 
+	and  T1."NoInvtryMv" = 'N' 
+	and T1."Quantity" > 0
+
+/*	The owner allows modification of the script as long you maintain the copy rights (c)	*
+ *	commented here with, for any clarification please get in touch wa.me/254759184063	*/
