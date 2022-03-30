@@ -1,0 +1,45 @@
+/*	Kindly do not edit comments or copyrights (c) 	*/
+
+--- Script By	:	Akida M Jafar
+--- Mail	:	info@techcaresinc.com
+--- Start Date	:	01.06.2020
+--- Objective	:	GL Operating Costs Analysis
+
+/* 	This script was initiated by the scripter to enable review	*
+ *	of company Day to Day postings 					*/
+
+SELECT 
+	Jafar."TransId" as "JE SAP No.", 
+	Jafar."BaseRef" as "Origin Doc No.", 
+	Jafar."Ref2" as "Custom No.",
+	Jafar."RefDate", 
+	Akida."AcctCode",
+	Akida."AcctName", 
+	Jafar."LineMemo", 
+	Jafar."OcrCode2" as "Asset", 
+	Jafar."OcrCode3" as "Depot / Location", 
+	Jafar."OcrCode5" as "Department", case 
+	
+	when Jafar."Credit"  > 0 
+		then -Jafar."Credit" 
+	else 
+		Jafar."Debit" 
+	end 
+		as "Amount/Expenditure" 
+
+FROM 
+	JDT1 Jafar  
+	INNER JOIN OACT Akida ON Jafar."Account" = Akida."AcctCode" 
+
+WHERE Jafar."RefDate" between [%0] and [%1] 
+	and Akida."AcctCode" between [%2] and [%3] 
+	and (Akida."AcctCode" Like '60%%' or Akida."AcctCode" Like '40%%' 
+		or Akida."AcctCode" Like '80%%' 
+	or (Akida."AcctCode" Like '1010%%' and (Akida."AcctName" Like '%%Depreciation%%'
+		or Akida."AcctName" Like '%%Armortisation%%'))) 
+
+ORDER BY Jafar."TransId"
+
+/*	
+ *	The owner allows modification of the script as long you maintain the copy rights (c)	*
+ *	commented here with, for any clarification please get in touch wa.me/254759184063	*/
